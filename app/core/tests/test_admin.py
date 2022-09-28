@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import Client
 
+
 class AdminSiteTests(TestCase):
 
     def setUp(self):
@@ -17,9 +18,9 @@ class AdminSiteTests(TestCase):
         )
         self.client.force_login(self.admin_user)
         self.user = get_user_model().objects.create_user(
-            email = "sample@samp.com",
-            password = "123fun",
-            name = "Joe Smith",
+            email="sample@samp.com",
+            password="123fun",
+            name="Joe Smith",
         )
 
     def test_users_list(self):
@@ -44,7 +45,3 @@ class AdminSiteTests(TestCase):
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, 200)
-
-
-
- 

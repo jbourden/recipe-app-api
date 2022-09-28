@@ -12,6 +12,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 
+
 def recipe_image_file_path(instance, filename):
     '''Generate file path for new recipe image'''
 
@@ -20,27 +21,32 @@ def recipe_image_file_path(instance, filename):
 
     return os.path.join('uploads', 'recipe', filename)
 
+
 class UserManager(BaseUserManager):
     '''Manager for users'''
 
-    def create_user(self, email, password = None, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('User must have an email address.')
 
-        user = self.model(email = self.normalize_email(email), **extra_fields)
+        user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password = None , **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):
 
-        superuser = self.model(email = self.normalize_email(email), **extra_fields)
+        superuser = self.model(
+            email=self.normalize_email(email),
+            **extra_fields
+        )
         superuser.set_password(password)
         superuser.is_superuser = True
         superuser.is_staff = True
         superuser.save(using=self._db)
 
         return superuser
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     '''User in the system'''
@@ -51,14 +57,41 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email' 
+    USERNAME_FIELD = 'email'
+
+
+class Tag(models.Model):
+    '''Tag object.'''
+
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    '''Ingredient object.'''
+
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.name
+
 
 class Recipe(models.Model):
     '''Recipe object.'''
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete = models.CASCADE  
+        on_delete=models.CASCADE
     )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -67,31 +100,7 @@ class Recipe(models.Model):
     link = models.CharField(max_length=255, blank=True)
     tags = models.ManyToManyField('Tag')
     ingredients = models.ManyToManyField('Ingredient')
-    image = models.ImageField(null = True, upload_to = recipe_image_file_path)
+    image = models.ImageField(null=True, upload_to=recipe_image_file_path)
 
     def __str__(self):
         return self.title
-
-class Tag(models.Model):
-    '''Tag object.'''
-
-    name = models.CharField(max_length=255)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete = models.CASCADE  
-    )
-
-    def __str__(self):
-        return self.name
-
-class Ingredient(models.Model):
-    '''Ingredient object.'''
-
-    name = models.CharField(max_length=255)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete = models.CASCADE  
-    )
-
-    def __str__(self):
-        return self.name
